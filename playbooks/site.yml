@@ -8,6 +8,7 @@
     - k3s
     - helm
     - prefect
+    - hoerspiel-data
 
 
     

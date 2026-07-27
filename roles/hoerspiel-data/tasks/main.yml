@@ -1,0 +1,10 @@
+---
+- name: Create Hörspiel Explorer data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /data/hoerspiel-explorer/raw/series_pages
+    - /data/hoerspiel-explorer/raw/detail_pages
+    - /data/hoerspiel-explorer/interim
