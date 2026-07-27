@@ -1,5 +1,5 @@
 ---
-- name: Create Hörspiel Explorer data directories
+- name: Create Hoerspiel Explorer data directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -8,3 +8,17 @@
     - /data/hoerspiel-explorer/raw/series_pages
     - /data/hoerspiel-explorer/raw/detail_pages
     - /data/hoerspiel-explorer/interim
+
+- name: Copy PV/PVC manifest to remote host
+  ansible.builtin.copy:
+    src: pv-pvc.yml
+    dest: /tmp/hoerspiel-data-pv-pvc.yml
+    mode: "0644"
+
+- name: Apply hoerspiel-data PersistentVolume and PVC
+  ansible.builtin.command:
+    cmd: kubectl apply -f /tmp/hoerspiel-data-pv-pvc.yml
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  register: pv_pvc_apply
+  changed_when: "'configured' in pv_pvc_apply.stdout or 'created' in pv_pvc_apply.stdout"

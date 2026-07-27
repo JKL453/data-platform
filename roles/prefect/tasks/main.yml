@@ -26,22 +26,24 @@
 
 - name: Install Prefect server
   ansible.builtin.command:
-    cmd: helm upgrade --install prefect-server prefect/prefect-server --namespace prefect
+    cmd: >
+      helm upgrade --install prefect-server prefect/prefect-server --namespace prefect
+      --set service.type=NodePort
+      --set service.nodePort=30420
+
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   register: prefect_server_install
   changed_when: "'has been upgraded' in prefect_server_install.stdout or 'has been installed' in prefect_server_install.stdout"
 
-- name: Install Prefect Kubernetes worker
+- name: Install Prefect server
   ansible.builtin.command:
     cmd: >
-      helm upgrade --install prefect-worker prefect/prefect-worker
-      --namespace prefect
-      --set worker.apiConfig=selfHostedServer
-      --set worker.config.workPool=data-platform
-      --set worker.config.type=kubernetes
-      --set worker.selfHostedServerApiConfig.apiUrl=http://prefect-server.prefect.svc.cluster.local:4200/api
+      helm upgrade --install prefect-server prefect/prefect-server --namespace prefect
+      --set service.type=NodePort
+      --set service.nodePort=30420
+      --set server.uiConfig.prefectUiApiUrl=http://192.168.188.50:30420/api
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-  register: prefect_worker_install
-  changed_when: "'has been upgraded' in prefect_worker_install.stdout or 'has been installed' in prefect_worker_install.stdout"
+  register: prefect_server_install
+  changed_when: "'has been upgraded' in prefect_server_install.stdout or 'has been installed' in prefect_server_install.stdout"
