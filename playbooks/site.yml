@@ -9,6 +9,7 @@
     - helm
     - prefect
     - hoerspiel-data
+    - hoerspiel-secrets
 
 
     

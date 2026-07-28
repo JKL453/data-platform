@@ -1,0 +1,28 @@
+---
+- name: Copy .env file to remote host
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../.env"
+    dest: /tmp/hoerspiel.env
+    mode: "0600"
+
+- name: Generate hoerspiel-secrets manifest from .env file
+  ansible.builtin.command:
+    cmd: >
+      kubectl create secret generic hoerspiel-secrets
+      --namespace=prefect
+      --from-env-file=/tmp/hoerspiel.env
+      --dry-run=client -o yaml
+  register: secret_manifest
+  changed_when: false
+
+- name: Apply the generated secret manifest
+  ansible.builtin.command:
+    cmd: kubectl apply -f -
+    stdin: "{{ secret_manifest.stdout }}"
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Remove temporary .env file from remote host
+  ansible.builtin.file:
+    path: /tmp/hoerspiel.env
+    state: absent
